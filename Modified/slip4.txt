@@ -1,0 +1,275 @@
+Q1.
+
+#include <stdio.h>
+
+#define NUM_RESOURCES 3 // number of resource types
+#define NUM_PROCESSES 5 // number of processes
+
+int allocation[NUM_PROCESSES][NUM_RESOURCES];
+int max[NUM_PROCESSES][NUM_RESOURCES];
+int need[NUM_PROCESSES][NUM_RESOURCES];
+int available[NUM_RESOURCES];
+
+void accept_available() {
+    printf("Enter available:\n");
+    for (int i = 0; i < NUM_RESOURCES; i++) {
+        scanf("%d", &available[i]);
+    }
+}
+
+void calculate_need() {
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+}
+
+void display_allocation_max() {
+    printf("Allocation:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            printf("%d ", allocation[i][j]);
+        }
+        printf("\n");
+    }
+    printf("Max:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            printf("%d ", max[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void display_need() {
+    printf("Need:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            printf("%d ", need[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void display_available() {
+    printf("Available:\n");
+    for (int i = 0; i < NUM_RESOURCES; i++) {
+        printf("%d ", available[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    
+    printf("Enter allocation:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        printf("Process %d: ", i);
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            scanf("%d", &allocation[i][j]);
+        }
+    }
+
+    printf("Enter max:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        printf("Process %d: ", i);
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            scanf("%d", &max[i][j]);
+        }
+    }
+
+    int choice;
+
+    do {
+        printf("Menu:\n");
+        printf("1. Accept available\n");
+        printf("2. Display allocation and max\n");
+        printf("3. Calculate need and display need\n");
+        printf("4. Display available\n");
+        printf("5. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                accept_available();
+                break;
+            case 2:
+                display_allocation_max();
+                break;
+            case 3:
+                calculate_need();
+                display_need();
+                break;
+            case 4:
+                display_available();
+                break;
+            case 5:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice\n");
+        }
+    } while (choice != 5);
+
+    return 0;
+}
+
+/*OUTPUT
+
+Enter allocation:
+Process 0: 0 1 0 
+Process 1: 4 0 0
+Process 2: 5 0 4
+Process 3: 4 3 3
+root@Prooxxy:/mnt/c/Users/Yashraj/Desktop# ./a.out 
+Enter allocation:
+Process 0: 0 1 0
+Process 1: 4 0 0 
+Process 2: 5 0 4
+Process 3: 4 3 3
+Process 4: 2 2 4
+Enter max:
+Process 0: 0 0 0
+Process 1: 5 2 2
+Process 2: 1 0 4
+Process 3: 4 4 4
+Process 4: 6 5 5
+Menu:
+1. Accept available
+2. Display allocation and max
+3. Calculate need and display need
+4. Display available
+5. Exit
+Enter choice: 1
+Enter available:
+7 2 6
+Menu:
+1. Accept available
+2. Display allocation and max
+3. Calculate need and display need
+4. Display available
+5. Exit
+Enter choice: 2
+Allocation:
+0 1 0 
+4 0 0 
+5 0 4 
+4 3 3 
+2 2 4 
+Max:
+0 0 0 
+5 2 2 
+1 0 4 
+4 4 4 
+6 5 5 
+Menu:
+1. Accept available
+2. Display allocation and max
+3. Calculate need and display need
+4. Display available
+5. Exit
+Enter choice: 3
+Need:
+0 -1 0 
+1 2 2 
+-4 0 0 
+0 1 1 
+4 3 1 
+Menu:
+1. Accept available
+2. Display allocation and max
+3. Calculate need and display need
+4. Display available
+5. Exit
+Enter choice: 4
+Available:
+7 2 6 
+Menu:
+1. Accept available
+2. Display allocation and max
+3. Calculate need and display need
+4. Display available
+5. Exit
+Enter choice: 5
+Exiting...
+
+*/
+
+----------------------------
+Q2.
+
+#include<stdio.h>
+#include<stdlib.h>
+
+int main() {
+    int n, head_pos, i, j, temp, total_head_movements = 0, left, right;
+
+    // Accepting input from user
+    printf("Enter total number of disk blocks: ");
+    scanf("%d", &n);
+
+    int queue[n];
+    int done[n];
+
+    printf("Enter the disk request string: ");
+    for(i=0; i<n; i++) {
+        scanf("%d", &queue[i]);
+        done[i] = 0;
+    }
+
+    printf("Enter current head position: ");
+    scanf("%d", &head_pos);
+
+    // Separating requests to left and right of the head
+    for(i=0; i<n-1; i++) {
+        for(j=i+1; j<n; j++) {
+            if(queue[i] > queue[j]) {
+                temp = queue[i];
+                queue[i] = queue[j];
+                queue[j] = temp;
+            }
+        }
+    }
+    left = 0;
+    right = n-1;
+    while(queue[right] > head_pos) {
+        right--;
+    }
+
+    // Serving requests from left to head
+    while(left <= right) {
+        printf("%d ", queue[right]);
+        total_head_movements += abs(head_pos - queue[right]);
+        head_pos = queue[right];
+        right--;
+    }
+    if(left <= right) {
+        printf("%d ", queue[left]);
+        total_head_movements += abs(head_pos - queue[left]);
+        head_pos = queue[left];
+        left++;
+    }
+
+    // Serving requests from head to right
+    while(left <= right) {
+        printf("%d ", queue[left]);
+        total_head_movements += abs(head_pos - queue[left]);
+        head_pos = queue[left];
+        left++;
+    }
+
+    // Total head movements
+    printf("\nTotal number of head movements: %d\n", total_head_movements);
+    return 0;
+}
+
+/*OUTPUT
+
+Enter total number of disk blocks: 8
+Enter the disk request string: 86 147 91 170 95 130 102 70
+Enter current head position: 125
+102 95 91 86 70 
+Total number of head movements: 55
+
+*/

@@ -1,0 +1,202 @@
+Q1.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define MAX_BLOCKS 100
+
+int bit_vector[MAX_BLOCKS]; // array to store allocated blocks
+int free_blocks = MAX_BLOCKS; // number of free blocks
+int block_size = 1; // size of each block
+
+// function to display the bit vector
+void show_bit_vector() {
+    int i;
+    printf("\nBlock\tStatus\n");
+    for(i=0; i<MAX_BLOCKS; i++) {
+        printf("%d\t", i);
+        if(bit_vector[i] == 1) {
+            printf("Allocated\n");
+        } else {
+            printf("Free\n");
+        }
+    }
+    printf("\n");
+}
+
+// function to display the directory
+void show_directory() {
+    int i, j, start_block, end_block, file_size;
+    printf("\nStart Block\tEnd Block\tFile Size\n");
+    for(i=0; i<MAX_BLOCKS; i++) {
+        if(bit_vector[i] == 1) {
+            start_block = i;
+            end_block = i;
+            file_size = block_size;
+            for(j=i+1; j<MAX_BLOCKS && bit_vector[j] == 1; j++) {
+                end_block = j;
+                file_size += block_size;
+            }
+            i = j-1;
+            printf("%d\t\t%d\t\t%d\n", start_block, end_block, file_size);
+        }
+    }
+    printf("\n");
+}
+
+// function to delete a file
+void delete_file() {
+    int start_block, end_block, i;
+    printf("\nEnter the starting block of the file you want to delete: ");
+    scanf("%d", &start_block);
+    if(bit_vector[start_block] == 0) {
+        printf("Block not allocated\n");
+        return;
+    }
+    end_block = start_block;
+    for(i=start_block; i<MAX_BLOCKS && bit_vector[i] == 1; i++) {
+        bit_vector[i] = 0;
+        free_blocks++;
+        end_block = i;
+    }
+    printf("File deleted\n");
+}
+
+int main() {
+    int choice, i, j, start_block, end_block, file_size;
+    srand(time(NULL)); // seed random number generator
+
+    // randomly allocate blocks
+    for(i=0; i<MAX_BLOCKS; i++) {
+        if(rand()%2 == 0 && free_blocks > 0) {
+            bit_vector[i] = 1;
+            free_blocks--;
+        } else {
+            bit_vector[i] = 0;
+        }
+    }
+
+    // display menu and take user input
+    while(1) {
+        printf("Menu:\n");
+        printf("1. Show Bit Vector\n");
+        printf("2. Show Directory\n");
+        printf("3. Delete File\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1:
+                show_bit_vector();
+                break;
+            case 2:
+                show_directory();
+                break;
+            case 3:
+                delete_file();
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice. Please enter a valid choice.\n");
+        }
+    }
+
+    return 0;
+}
+
+-----------------------------
+Q2.
+
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+   int queue[20],n,head,i,j,k,seek=0,max,diff,temp,queue1[20],queue2[20],temp1=0,temp2=0;
+   
+   printf("Enter the max range of disk\n");
+   scanf("%d",&max);
+   printf("Enter the initial head position\n");
+   scanf("%d",&head);
+   printf("Enter size of queue request\n");
+   scanf("%d",&n);
+   printf("Enter queue of disk positions to be read\n");
+   for(i=1;i<=n;i++)
+   {
+      scanf("%d",&temp);
+      if(temp>=head)
+      {
+         queue1[temp1]=temp;
+         temp1++;
+      }
+      else
+      {
+         queue2[temp2]=temp;
+         temp2++;
+      }
+   }
+   for(i=0;i<temp1-1;i++)
+   {
+      for(j=i+1;j<temp1;j++)
+      {
+         if(queue1[i]>queue1[j])
+         {
+            temp=queue1[i];
+            queue1[i]=queue1[j];
+            queue1[j]=temp;
+         }
+      }
+   }
+   for(i=0;i<temp2;i++)
+   {
+      for(j=i+1;j<temp2;j++)
+      {
+         if(queue2[i]>queue2[j])
+         {
+            temp=queue2[i];
+            queue2[i]=queue2[j];
+            queue2[j]=temp;
+         }
+      }
+   }
+   for(i=1,j=0;j<temp1;i++,j++)
+      queue[i]=queue1[j];
+   queue[i]=max;
+   queue[i+1]=0;
+   for(i=temp1+3,j=0;j<temp2;i++,j++)
+      queue[i]=queue2[j];
+   //queue[i]=0;
+   queue[0]=head;
+   for(j=0;j<=n+1;j++)
+   {
+      diff=abs(queue[j+1]-queue[j]);
+      seek+=diff;
+      printf("Disk head moves from %d to %d \n",queue[j],queue[j+1]);
+   }
+   printf("Total seek time is %d\n",seek-max);
+}
+/*
+ty23@pc20:~/OS2/Assignment3$ gcc q3.c
+ty23@pc20:~/OS2/Assignment3$ ./a.out
+Enter the max range of disk
+199
+Enter the initial head position
+53
+Enter size of queue request
+7
+Enter queue of disk positions to be read
+82 170 43 140 24 16 190
+Disk head moves from 53 to 82 
+Disk head moves from 82 to 140 
+Disk head moves from 140 to 170 
+Disk head moves from 170 to 190 
+Disk head moves from 190 to 199 
+Disk head moves from 199 to 0 
+Disk head moves from 0 to 16 
+Disk head moves from 16 to 24 
+Disk head moves from 24 to 43 
+Total seek time is 189
+ty23@pc20:~/OS2/Assignment3$ 
+
+*/

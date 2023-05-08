@@ -1,0 +1,82 @@
+Q1. 
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, i, request, total_head_movements = 0;
+    printf("Enter the total number of disk blocks: ");
+    scanf("%d", &n);
+    printf("Enter the disk request string:\n");
+    scanf("%d", &request);
+    head = request;
+    printf("%d -> ", head);
+    for (i = 1; i < n; i++) {
+        scanf("%d", &request);
+        total_head_movements += abs(request - head);
+        printf("%d -> ", request);
+        head = request;
+    }
+    printf("End\n");
+    printf("Total number of head movements: %d\n", total_head_movements);
+    return 0;
+}
+
+/*OUTPUT
+
+Enter the total number of disk blocks: 9
+Enter the disk request string:
+55 58 39 18 90 160 150 38 184
+55 -> 58 -> 39 -> 18 -> 90 -> 160 -> 150 -> 38 -> 184 -> End
+Total number of head movements: 453
+
+*/
+
+------------------------
+Q2.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define ARRAY_SIZE 1000
+
+int main(int argc, char** argv) {
+    int rank, size;
+    int array[ARRAY_SIZE];
+    int i, sum = 0, even_sum = 0;
+    MPI_Status status;
+
+    // Initialize MPI environment
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Seed the random number generator
+    srand(rank);
+
+    // Initialize the array with random numbers
+    for (i = 0; i < ARRAY_SIZE; i++) {
+        array[i] = rand();
+    }
+
+    // Calculate the sum of all even numbers
+    for (i = rank; i < ARRAY_SIZE; i += size) {
+        sum += array[i];
+        if (array[i] % 2 == 0) {
+            even_sum += array[i];
+        }
+    }
+
+    // Reduce the even_sum across all processes
+    MPI_Reduce(&even_sum, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // Print the result
+    if (rank == 0) {
+        printf("Sum of all even numbers: %d\n", sum);
+    }
+
+    // Finalize MPI environment
+    MPI_Finalize();
+    return 0;
+}

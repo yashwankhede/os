@@ -1,0 +1,189 @@
+Q1. 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_BLOCKS 100
+
+bool allocated[MAX_BLOCKS] = {false};
+int directory[MAX_BLOCKS] = {0};
+int num_free_blocks = MAX_BLOCKS;
+
+void show_bit_vector(int num_blocks) {
+    printf("Bit Vector:\n");
+    for (int i = 0; i < num_blocks; i++) {
+        printf("%d ", allocated[i]);
+    }
+    printf("\n");
+}
+
+void create_new_file(int num_blocks, int num_disk_blocks) {
+    if (num_blocks > num_free_blocks) {
+        printf("Error: Not enough free blocks on disk\n");
+        return;
+    }
+    int starting_block = -1;
+    for (int i = 0; i < num_disk_blocks; i++) {
+        int j;
+        for (j = i; j < i + num_blocks; j++) {
+            if (allocated[j]) {
+                break;
+            }
+        }
+        if (j == i + num_blocks) {
+            starting_block = i;
+            break;
+        }
+    }
+    if (starting_block == -1) {
+        printf("Error: Cannot allocate contiguous space for file\n");
+        return;
+    }
+    for (int i = starting_block; i < starting_block + num_blocks; i++) {
+        allocated[i] = true;
+        num_free_blocks--;
+        directory[i] = -1;
+    }
+    printf("File created starting at block %d\n", starting_block);
+}
+
+void show_directory(int num_blocks) {
+    printf("Directory:\n");
+    for (int i = 0; i < num_blocks; i++) {
+        printf("%d ", directory[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    int num_blocks, num_disk_blocks, choice;
+    printf("Enter number of blocks on disk: ");
+    scanf("%d", &num_disk_blocks);
+    printf("Enter number of blocks per file: ");
+    scanf("%d", &num_blocks);
+
+    while (true) {
+        printf("Menu:\n");
+        printf("1. Show bit vector\n");
+        printf("2. Create new file\n");
+        printf("3. Show directory\n");
+        printf("4. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                show_bit_vector(num_disk_blocks);
+                break;
+            case 2:
+                create_new_file(num_blocks, num_disk_blocks);
+                break;
+            case 3:
+                show_directory(num_disk_blocks);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+
+    return 0;
+}
+
+--------------------
+Q2.
+
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+   int queue[20],n,head,i,j,k,seek=0,max,diff,temp,queue1[20],queue2[20],temp1=0,temp2=0;
+   
+   printf("Enter the max range of disk\n");
+   scanf("%d",&max);
+   printf("Enter the initial head position\n");
+   scanf("%d",&head);
+   printf("Enter size of queue request\n");
+   scanf("%d",&n);
+   printf("Enter queue of disk positions to be read\n");
+   for(i=1;i<=n;i++)
+   {
+      scanf("%d",&temp);
+      if(temp>=head)
+      {
+         queue1[temp1]=temp;
+         temp1++;
+      }
+      else
+      {
+         queue2[temp2]=temp;
+         temp2++;
+      }
+   }
+   for(i=0;i<temp1-1;i++)
+   {
+      for(j=i+1;j<temp1;j++)
+      {
+         if(queue1[i]>queue1[j])
+         {
+            temp=queue1[i];
+            queue1[i]=queue1[j];
+            queue1[j]=temp;
+         }
+      }
+   }
+   for(i=0;i<temp2;i++)
+   {
+      for(j=i+1;j<temp2;j++)
+      {
+         if(queue2[i]>queue2[j])
+         {
+            temp=queue2[i];
+            queue2[i]=queue2[j];
+            queue2[j]=temp;
+         }
+      }
+   }
+   for(i=1,j=0;j<temp1;i++,j++)
+      queue[i]=queue1[j];
+   queue[i]=max;
+   queue[i+1]=0;
+   for(i=temp1+3,j=0;j<temp2;i++,j++)
+      queue[i]=queue2[j];
+   //queue[i]=0;
+   queue[0]=head;
+   for(j=0;j<=n+1;j++)
+   {
+      diff=abs(queue[j+1]-queue[j]);
+      seek+=diff;
+      printf("Disk head moves from %d to %d \n",queue[j],queue[j+1]);
+   }
+   printf("Total seek time is %d\n",seek-max);
+}
+/*
+ty23@pc20:~/OS2/Assignment3$ gcc q3.c
+ty23@pc20:~/OS2/Assignment3$ ./a.out
+Enter the max range of disk
+199
+Enter the initial head position
+53
+Enter size of queue request
+7
+Enter queue of disk positions to be read
+82 170 43 140 24 16 190
+Disk head moves from 53 to 82 
+Disk head moves from 82 to 140 
+Disk head moves from 140 to 170 
+Disk head moves from 170 to 190 
+Disk head moves from 190 to 199 
+Disk head moves from 199 to 0 
+Disk head moves from 0 to 16 
+Disk head moves from 16 to 24 
+Disk head moves from 24 to 43 
+Total seek time is 189
+ty23@pc20:~/OS2/Assignment3$ 
+
+*/

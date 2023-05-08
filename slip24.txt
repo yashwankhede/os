@@ -1,0 +1,161 @@
+Q1. 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+int main(int argc, char **argv) {
+    int rank, size;
+    int i, sum = 0;
+    int *data;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Each process generates a portion of the random numbers
+    int chunk_size = 1000 / size;
+    data = (int*) malloc(chunk_size * sizeof(int));
+    srand(rank + 1);
+    for (i = 0; i < chunk_size; i++) {
+        data[i] = rand();
+    }
+
+    // Each process calculates the sum of odd numbers in its portion
+    int local_sum = 0;
+    for (i = 0; i < chunk_size; i++) {
+        if (data[i] % 2 == 1) {
+            local_sum += data[i];
+        }
+    }
+
+    // Reduce the local sums to the global sum
+    MPI_Reduce(&local_sum, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // Print the global sum on the root process
+    if (rank == 0) {
+        printf("Sum of all odd numbers: %d\n", sum);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+
+
+----------------------------
+Q2.
+
+
+#include <stdio.h>
+
+int main() {
+  int allocation[5][4], max[5][4], need[5][4], available[4];
+  int work[4], finish[5], safeSequence[5];
+  int nProcesses, nResources, i, j, k;
+
+  // Accept allocation and max from user
+  printf("Enter number of processes: ");
+  scanf("%d", &nProcesses);
+  printf("Enter number of resources: ");
+  scanf("%d", &nResources);
+
+  for (i = 0; i < nProcesses; i++) {
+    printf("Enter allocation for process %d: ", i);
+    for (j = 0; j < nResources; j++) {
+      scanf("%d", &allocation[i][j]);
+    }
+  }
+
+  for (i = 0; i < nProcesses; i++) {
+    printf("Enter max for process %d: ", i);
+    for (j = 0; j < nResources; j++) {
+      scanf("%d", &max[i][j]);
+      need[i][j] = max[i][j] - allocation[i][j];
+    }
+  }
+
+  // Accept available resources from user
+  printf("Enter available resources: ");
+  for (i = 0; i < nResources; i++) {
+    scanf("%d", &available[i]);
+  }
+
+  // Initialize finish array and work array
+  for (i = 0; i < nProcesses; i++) {
+    finish[i] = 0;
+  }
+  for (i = 0; i < nResources; i++) {
+    work[i] = available[i];
+  }
+
+  // Find safe sequence
+  int count = 0;
+  while (count < nProcesses) {
+    int found = 0;
+    for (i = 0; i < nProcesses; i++) {
+      if (finish[i] == 0) {
+        int safe = 1;
+        for (j = 0; j < nResources; j++) {
+          if (need[i][j] > work[j]) {
+            safe = 0;
+            break;
+          }
+        }
+        if (safe) {
+          for (j = 0; j < nResources; j++) {
+            work[j] += allocation[i][j];
+          }
+          safeSequence[count++] = i;
+          finish[i] = 1;
+          found = 1;
+        }
+      }
+    }
+    if (!found) {
+      printf("System is not in safe state.\n");
+      return 0;
+    }
+  }
+
+  // Print need matrix and safe sequence
+  printf("Need matrix:\n");
+  for (i = 0; i < nProcesses; i++) {
+    for (j = 0; j < nResources; j++) {
+      printf("%d ", need[i][j]);
+    }
+    printf("\n");
+  }
+  printf("System is in safe state.\nSafe sequence: ");
+  for (i = 0; i < nProcesses; i++) {
+    printf("%d ", safeSequence[i]);
+  }
+  printf("\n");
+
+  return 0;
+}
+
+/*OUTPUT
+
+Enter number of processes: 5
+Enter number of resources: 3
+Enter allocation for process 0: 0 1 0
+Enter allocation for process 1: 2 0 0
+Enter allocation for process 2: 3 0 3
+Enter allocation for process 3: 2 1 1
+Enter allocation for process 4: 0 0 2
+Enter max for process 0: 0 0 0
+Enter max for process 1: 2 0 2
+Enter max for process 2: 0 0 0
+Enter max for process 3: 1 0 0
+Enter max for process 4: 0 0 2
+Enter available resources: 0 0 0
+Need matrix:
+0 -1 0 
+0 0 2 
+-3 0 -3 
+-1 -1 -1 
+0 0 0 
+System is in safe state.
+Safe sequence: 0 2 3 4 1 
+
+*/

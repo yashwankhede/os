@@ -1,0 +1,136 @@
+Q1. 
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int i, j, n, head, temp, head_movements = 0, request[100], visited[100] = {0};
+    char direction;
+
+    // Accept input from user
+    printf("Enter the total number of disk blocks: ");
+    scanf("%d", &n);
+    printf("Enter the disk request string: ");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &request[i]);
+    }
+    printf("Enter the starting head position: ");
+    scanf("%d", &head);
+    printf("Enter the direction (L/R): ");
+    scanf(" %c", &direction);
+
+    // Sort the requests in ascending order
+    for (i = 0; i < n - 1; i++) {
+        for (j = i + 1; j < n; j++) {
+            if (request[i] > request[j]) {
+                temp = request[i];
+                request[i] = request[j];
+                request[j] = temp;
+            }
+        }
+    }
+
+    // Calculate head movements
+    int current_pos = head;
+    if (direction == 'L') {
+        for (i = n - 1; i >= 0; i--) {
+            if (request[i] <= current_pos && !visited[i]) {
+                printf("%d ", request[i]);
+                visited[i] = 1;
+                head_movements += abs(current_pos - request[i]);
+                current_pos = request[i];
+            }
+        }
+        for (i = n - 1; i >= 0; i--) {
+            if (!visited[i]) {
+                printf("%d ", request[i]);
+                visited[i] = 1;
+                head_movements += abs(current_pos - request[i]);
+                current_pos = request[i];
+            }
+        }
+    } else if (direction == 'R') {
+        for (i = 0; i < n; i++) {
+            if (request[i] >= current_pos && !visited[i]) {
+                printf("%d ", request[i]);
+                visited[i] = 1;
+                head_movements += abs(current_pos - request[i]);
+                current_pos = request[i];
+            }
+        }
+        for (i = 0; i < n; i++) {
+            if (!visited[i]) {
+                printf("%d ", request[i]);
+                visited[i] = 1;
+                head_movements += abs(current_pos - request[i]);
+                current_pos = request[i];
+            }
+        }
+    }
+
+    // Display the total number of head movements
+    printf("\nTotal number of head movements: %d\n", head_movements);
+
+    return 0;
+}
+
+/*OUTPUT
+
+Enter the total number of disk blocks: 9
+Enter the disk request string: 56 59 40 19 91 161 151 39 185
+Enter the starting head position: 48
+Enter the direction (L/R): L
+40 39 19 185 161 151 91 59 56 
+Total number of head movements: 324
+
+*/
+
+
+-------------------------
+Q2.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define N 1000 // number of elements in array
+
+int main(int argc, char **argv) {
+    int rank, size, i;
+    int sum = 0, local_sum = 0;
+    int *arr;
+    double start_time, end_time;
+
+    // initialize MPI environment
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // allocate memory for array
+    arr = (int *) malloc(N * sizeof(int));
+
+    // fill array with random numbers
+    srand(42); // seed for random number generator
+    for (i = 0; i < N; i++) {
+        arr[i] = rand() % 100; // generate number between 0 and 99
+    }
+
+    // calculate local sum for each process
+    for (i = rank; i < N; i += size) {
+        local_sum += arr[i];
+    }
+
+    // combine local sums from all processes
+    MPI_Reduce(&local_sum, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // print result from root process
+    if (rank == 0) {
+        printf("Sum: %d\n", sum);
+    }
+
+    // free memory and finalize MPI environment
+    free(arr);
+    MPI_Finalize();
+
+    return 0;
+}

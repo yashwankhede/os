@@ -1,0 +1,174 @@
+Q1.
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define NUM_RESOURCES 4
+#define NUM_PROCESSES 5
+
+// Function to check if the system is in a safe state
+bool isSafeState(int available[], int max[][NUM_RESOURCES], int allocation[][NUM_RESOURCES], int need[][NUM_RESOURCES], int num_processes) {
+    int i, j;
+    bool finish[num_processes];
+    int work[NUM_RESOURCES];
+
+    // Initialize finish array to false and work array to available array
+    for (i = 0; i < num_processes; i++) {
+        finish[i] = false;
+    }
+    for (i = 0; i < NUM_RESOURCES; i++) {
+        work[i] = available[i];
+    }
+
+    // Loop through all processes until all are finished or unsafe state is detected
+    int count = 0;
+    while (count < num_processes) {
+        bool found = false;
+        // Find an unfinished process that can be executed
+        for (i = 0; i < num_processes; i++) {
+            if (!finish[i]) {
+                // Check if the process can be executed with the available resources
+                bool can_execute = true;
+                for (j = 0; j < NUM_RESOURCES; j++) {
+                    if (need[i][j] > work[j]) {
+                        can_execute = false;
+                        break;
+                    }
+                }
+                if (can_execute) {
+                    found = true;
+                    // Mark the process as finished and release its resources
+                    finish[i] = true;
+                    for (j = 0; j < NUM_RESOURCES; j++) {
+                        work[j] += allocation[i][j];
+                    }
+                    count++;
+                    break;
+                }
+            }
+        }
+        // If no unfinished process can be executed, the system is not in a safe state
+        if (!found) {
+            return false;
+        }
+    }
+
+    // If all processes finished, the system is in a safe state
+    return true;
+}
+
+int main() {
+    int max[NUM_PROCESSES][NUM_RESOURCES];
+    int allocation[NUM_PROCESSES][NUM_RESOURCES];
+    int available[NUM_RESOURCES];
+    int need[NUM_PROCESSES][NUM_RESOURCES];
+
+    // Input allocation, max, and available arrays
+    printf("Enter Allocation:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            scanf("%d", &allocation[i][j]);
+        }
+    }
+    printf("Enter Max:\n");
+    for (int i = 0; i < NUM_PROCESSES; i++) {
+        for (int j = 0; j < NUM_RESOURCES; j++) {
+            scanf("%d", &max[i][j]);
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+    printf("Enter Available:\n");
+    for (int i = 0; i < NUM_RESOURCES; i++) {
+        scanf("%d", &available[i]);
+    }
+
+    // Check if the system is in a safe state
+    if (isSafeState(available, max, allocation, need, NUM_PROCESSES)) {
+        printf("The system is in a safe state.\n");
+    }
+    else {
+        printf("The system is not in a safe state.\n");
+    }
+
+    return 0;
+}
+
+/*OUTPUT
+
+Enter Allocation:
+0 0 1 2
+1 0 0 0 
+1 3 5 4
+0 6 3 2
+0 0 1 4
+Enter Max:
+0 0 1 2
+1 7 5 0
+2 3 5 6
+0 6 5 2
+0 6 5 6
+Enter Available:
+1 5 2 0
+The system is in a safe state.
+
+*/
+
+---------------------
+Q2.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, i, j, temp, sum = 0;
+    printf("Enter the total number of disk blocks: ");
+    scanf("%d", &n);
+
+    int requests[n];
+    printf("Enter the disk request string:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter the starting head position: ");
+    scanf("%d", &head);
+
+    // sort the requests in ascending order
+    for (i = 0; i < n; i++) {
+        for (j = i + 1; j < n; j++) {
+            if (requests[i] > requests[j]) {
+                temp = requests[i];
+                requests[i] = requests[j];
+                requests[j] = temp;
+            }
+        }
+    }
+
+    // find the index of the head position
+    int index;
+    for (i = 0; i < n; i++) {
+        if (requests[i] >= head) {
+            index = i;
+            break;
+        }
+    }
+
+    printf("\nOrder of request served:\n");
+    // handle left side of head position
+    for (i = index; i >= 0; i--) {
+        printf("%d ", requests[i]);
+        sum += abs(requests[i] - head);
+        head = requests[i];
+    }
+
+    // handle right side of head position
+    for (i = index + 1; i < n; i++) {
+        printf("%d ", requests[i]);
+        sum += abs(requests[i] - head);
+        head = requests[i];
+    }
+
+    printf("\nTotal number of head movements: %d", sum);
+
+    return 0;
+}

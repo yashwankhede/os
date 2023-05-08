@@ -1,0 +1,301 @@
+Q1.
+
+#include <stdio.h>
+
+#define MAX_PROCESSES 6
+#define MAX_RESOURCES 6
+
+int allocation[MAX_PROCESSES][MAX_RESOURCES];
+int max[MAX_PROCESSES][MAX_RESOURCES];
+int need[MAX_PROCESSES][MAX_RESOURCES];
+int available[MAX_RESOURCES];
+
+int num_processes, num_resources;
+
+void print_matrix(int matrix[][MAX_RESOURCES], const char *name) {
+    printf("%s matrix:\n", name);
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void accept_available() {
+    printf("Enter the available vector:\n");
+    for (int i = 0; i < num_resources; i++) {
+        scanf("%d", &available[i]);
+    }
+}
+
+void accept_allocation() {
+    printf("Enter the allocation matrix:\n");
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            scanf("%d", &allocation[i][j]);
+        }
+    }
+}
+
+void accept_max() {
+    printf("Enter the max matrix:\n");
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            scanf("%d", &max[i][j]);
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+}
+
+void display_need() {
+    print_matrix(need, "Need");
+}
+
+void display_available() {
+    printf("Available vector:\n");
+    for (int i = 0; i < num_resources; i++) {
+        printf("%d ", available[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    printf("Enter the number of processes (up to %d): ", MAX_PROCESSES);
+    scanf("%d", &num_processes);
+    printf("Enter the number of resources (up to %d): ", MAX_RESOURCES);
+    scanf("%d", &num_resources);
+
+    accept_available();
+    accept_allocation();
+    accept_max();
+
+    while (1) {
+        printf("\nChoose an option:\n");
+        printf("1. Display Allocation, Max\n");
+        printf("2. Display Need\n");
+        printf("3. Display Available\n");
+        printf("4. Quit\n");
+
+        int choice;
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                print_matrix(allocation, "Allocation");
+                print_matrix(max, "Max");
+                break;
+            case 2:
+                display_need();
+                break;
+            case 3:
+                display_available();
+                break;
+            case 4:
+                return 0;
+            default:
+                printf("Invalid option.\n");
+                break;
+        }
+    }
+
+    return 0;
+}
+
+/* OUTPUT
+
+Enter the number of processes (up to 6): 4
+Enter the number of resources (up to 6): 2
+Enter the available vector:
+1
+2
+Enter the allocation matrix:
+1
+2
+3
+4
+4
+2
+1
+2
+Enter the max matrix:
+3
+3
+2
+3
+4
+4
+5
+6
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+1
+Allocation matrix:
+1 2 
+3 4 
+4 2 
+1 2 
+Max matrix:
+3 3 
+2 3 
+4 4 
+5 6 
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+2
+Need matrix:
+2 1 
+-1 -1 
+0 2 
+4 4 
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+root@Prooxxy:/mnt/c/Users/Yashraj/Desktop# ./a.out 
+Enter the number of processes (up to 6): 5
+Enter the number of resources (up to 6): 3
+Enter the available vector:
+3
+3
+2
+Enter the allocation matrix:
+2 3 2
+4 0 0
+5 0 4
+4 3 3
+2 2 4
+Enter the max matrix:
+9 7 5
+5 2 2
+1 0 4
+4 4 4
+6 5 5
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+1
+Allocation matrix:
+2 3 2 
+4 0 0 
+5 0 4 
+4 3 3 
+2 2 4 
+Max matrix:
+9 7 5 
+5 2 2 
+1 0 4 
+4 4 4 
+6 5 5 
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+root@Prooxxy:/mnt/c/Users/Yashraj/Desktop# ./a.out 
+Enter the number of processes (up to 6): 5
+Enter the number of resources (up to 6): 3
+Enter the available vector:
+3 3 2
+Enter the allocation matrix:
+2 3 2
+4 0 0 
+5 0 4
+4 3 3
+2 2 4
+Enter the max matrix:
+9 7 5
+5 2 2
+1 0 4
+4 4 4
+6 5 5
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+1
+Allocation matrix:
+2 3 2 
+4 0 0 
+5 0 4 
+4 3 3 
+2 2 4 
+Max matrix:
+9 7 5 
+5 2 2 
+1 0 4 
+4 4 4 
+6 5 5 
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+2
+Need matrix:
+7 4 3 
+1 2 2 
+-4 0 0 
+0 1 1 
+4 3 1 
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+3
+Available vector:
+3 3 2 
+
+Choose an option:
+1. Display Allocation, Max
+2. Display Need
+3. Display Available
+4. Quit
+4
+
+*/
+
+
+
+------------------------
+
+////slip1 Q2////
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+	int RQ[100],i,n,TotalHeadMoment=0,initial;
+	printf("Enter the number of Request \n");
+	scanf("%d",&n);
+	printf("Enter the request sequence \n");
+	for(i=0;i<n;i++)
+	scanf("%d",&RQ[i]);
+	printf("Enter initial head position \n");
+	scanf("%d",&initial);
+	
+	for(i=0;i<n;i++)
+{
+	TotalHeadMoment=TotalHeadMoment+abs(RQ[i]-initial);
+	initial=RQ[i];
+}
+	printf("totalHeadMoment is %d",TotalHeadMoment);
+	return 0;
+}

@@ -1,0 +1,126 @@
+Q1. 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define ARRAY_SIZE 1000
+
+int main(int argc, char** argv) {
+    int rank, size;
+    int array[ARRAY_SIZE];
+    int i, sum = 0, even_sum = 0;
+    MPI_Status status;
+
+    // Initialize MPI environment
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Seed the random number generator
+    srand(rank);
+
+    // Initialize the array with random numbers
+    for (i = 0; i < ARRAY_SIZE; i++) {
+        array[i] = rand();
+    }
+
+    // Calculate the sum of all even numbers
+    for (i = rank; i < ARRAY_SIZE; i += size) {
+        sum += array[i];
+        if (array[i] % 2 == 0) {
+            even_sum += array[i];
+        }
+    }
+
+    // Reduce the even_sum across all processes
+    MPI_Reduce(&even_sum, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // Print the result
+    if (rank == 0) {
+        printf("Sum of all even numbers: %d\n", sum);
+    }
+
+    // Finalize MPI environment
+    MPI_Finalize();
+    return 0;
+}
+
+--------------------
+Q2.
+
+include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+  int RQ[100],i,j,n,thm=0,initial,curr,move,m=0;
+  printf("Enter number of request\n");
+  scanf("%d",&n);
+  printf("Enter the request sequence\n");
+  for(i=0;i<n;i++)
+  {
+      scanf("%d",&RQ[i]);
+  }
+  printf("Enter initial head position\n");
+  scanf("%d",&initial);
+  //printf("Enter total disk size\n");
+  //scanf("%d",&size);
+  printf("Enter the head moment direction for high 1 and for low 0\n");
+  scanf("%d",&move);
+  
+  for(i=0;i<n;i++)
+  {
+     for(j=0;j<n-1;j++)
+     {
+        if(RQ[j]>RQ[j+1])
+        {
+           int temp;
+           temp=RQ[j];
+           RQ[j]=RQ[j+1];
+           RQ[j+1]=temp;
+        }
+     }
+  }
+  int index;
+  for(i=0;i<n;i++)
+  {
+     if(RQ[i]>initial)
+     {
+        m=i;
+        break;
+     }
+  }
+  curr=initial;
+  if(move==1)
+  {
+     for(j=i;j<n;j++)
+     {
+       thm=thm+abs(RQ[j]-initial);
+       initial=RQ[j];
+     }
+     curr=RQ[0];
+     for(j=1;j<m;j++)
+     {
+        thm=thm+abs(RQ[j]-curr);
+        curr=RQ[j];
+     }
+  }
+  else
+  {
+     for(j=i-1;j>=0;j--)
+     {
+        thm=thm+abs(RQ[j]-curr);
+        curr=RQ[j];
+     }
+     curr=RQ[n-1];
+     
+     for(j=n-1;j>=m;j--)
+     {
+        thm=thm+abs(RQ[j]-curr);
+        curr=RQ[j];
+     }
+  }
+
+  printf("Total head moment=%d",thm);
+  
+}

@@ -1,0 +1,260 @@
+Q1.
+
+#include <stdio.h>
+
+#define MAX_PROCESSES 6
+#define MAX_RESOURCES 6
+
+int allocation[MAX_PROCESSES][MAX_RESOURCES];
+int max[MAX_PROCESSES][MAX_RESOURCES];
+int need[MAX_PROCESSES][MAX_RESOURCES];
+int available[MAX_RESOURCES];
+
+int num_processes, num_resources;
+
+void print_matrix(int matrix[][MAX_RESOURCES], const char *name) {
+    printf("%s matrix:\n", name);
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void accept_available() {
+    printf("Enter the available vector:\n");
+    for (int i = 0; i < num_resources; i++) {
+        scanf("%d", &available[i]);
+    }
+}
+
+void accept_allocation() {
+    printf("Enter the allocation matrix:\n");
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            scanf("%d", &allocation[i][j]);
+        }
+    }
+}
+
+void accept_max() {
+    printf("Enter the max matrix:\n");
+    for (int i = 0; i < num_processes; i++) {
+        for (int j = 0; j < num_resources; j++) {
+            scanf("%d", &max[i][j]);
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+    }
+}
+
+void display_need() {
+    print_matrix(need, "Need");
+}
+
+void display_available() {
+    printf("Available vector:\n");
+    for (int i = 0; i < num_resources; i++) {
+        printf("%d ", available[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    printf("Enter the number of processes (up to %d): ", MAX_PROCESSES);
+    scanf("%d", &num_processes);
+    printf("Enter the number of resources (up to %d): ", MAX_RESOURCES);
+    scanf("%d", &num_resources);
+
+    accept_allocation();
+    accept_max();
+
+    while (1) {
+        printf("\nChoose an option:\n");
+        printf("1. Accept Available\n");
+        printf("2. Display Allocation, Max\n");
+        printf("3. Display Need\n");
+        printf("4. Display Available\n");
+        printf("5. Quit\n");
+
+        int choice;
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                accept_available();
+                break;
+            case 2:
+                print_matrix(allocation, "Allocation");
+                print_matrix(max, "Max");
+                break;
+            case 3:
+                display_need();
+                break;
+            case 4:
+                display_available();
+                break;
+            case 5:
+                return 0;
+            default:
+                printf("Invalid option.\n");
+                break;
+        }
+    }
+
+    return 0;
+}
+
+/*OUTPUT
+
+Enter the number of processes (up to 6): 5
+Enter the number of resources (up to 6): 3
+Enter the allocation matrix:
+0 1 0
+2 0 0
+3 0 3
+2 1 1
+0 0 2
+Enter the max matrix:
+0 0 0 
+2 0 2
+0 0 0
+1 0 0
+0 0 2
+
+Choose an option:
+1. Accept Available
+2. Display Allocation, Max
+3. Display Need
+4. Display Available
+5. Quit
+1   
+Enter the available vector:
+0 0 0
+
+Choose an option:
+1. Accept Available
+2. Display Allocation, Max
+3. Display Need
+4. Display Available
+5. Quit
+2
+Allocation matrix:
+0 1 0 
+2 0 0 
+3 0 3 
+2 1 1 
+0 0 2 
+Max matrix:
+0 0 0 
+2 0 2 
+0 0 0 
+1 0 0 
+0 0 2 
+
+Choose an option:
+1. Accept Available
+2. Display Allocation, Max
+3. Display Need
+4. Display Available
+5. Quit
+3
+Need matrix:
+0 -1 0 
+0 0 2 
+-3 0 -3 
+-1 -1 -1 
+0 0 0 
+
+Choose an option:
+1. Accept Available
+2. Display Allocation, Max
+3. Display Need
+4. Display Available
+5. Quit
+4
+Available vector:
+0 0 0 
+
+Choose an option:
+1. Accept Available
+2. Display Allocation, Max
+3. Display Need
+4. Display Available
+5. Quit
+5
+
+*/
+
+--------------------------------------
+
+////slip11 Q2/////
+
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<mpi.h>
+#include<assert.h>
+#include<time.h>
+
+float *create_rand_nums(int num_elements)
+{
+	float *rand_nums=(float *)malloc(sizeof(float)*num_elements);
+	assert(rand_nums !=NULL);
+	int i;
+	for(i=0;i<num_elements;i++)
+		{
+			rand_nums[i]=(rand()/(float)RAND_MAX);
+		}
+		return rand_nums;
+}
+
+int main(int argc, char**argv)
+{
+	if(argc!=2)
+	{
+		fprintf(stderr,"usage:avg num_elements_per_proc\n");
+		exit(1);
+	}
+	int num_elements_per_proc=atoi(argv[1]);
+	MPI_Init(NULL,NULL);
+	int world_rank;
+	MPI_Comm_rank(MPI_COMM_WORLD,&world_rank);
+	int world_size;
+	MPI_Comm_size(MPI_COMM_WORLD,&world_size);
+	
+	srand(time(NULL)*world_rank);
+	float *rand_nums=NULL;
+	rand_nums=create_rand_nums(num_elements_per_proc);
+	
+	float max=0;
+	int k;
+	for(k=0;k<num_elements_per_proc;k++)
+	{
+		if(rand_nums[k]>max);
+		{
+			max=rand_nums[k];
+		}
+	}
+	float global_max;
+	MPI_Reduce(&max,&global_max,1,MPI_FLOAT,MPI_MAX,0,MPI_COMM_WORLD);
+	float min=999;
+	int z;
+	for(z=0;z<num_elements_per_proc;z++)
+	{
+		if(rand_nums[z]<min)
+		{
+			min=rand_nums[z];
+		}
+	}
+	float global_min;
+	MPI_Reduce(&min,&global_min,1,MPI_FLOAT,MPI_MIN,0,MPI_COMM_WORLD);
+	if(world_rank==0)
+	{
+		printf("max is %f\n",global_max);
+		printf("min is %f\n",global_min);
+	}
+		free(rand_nums);
+		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Finalize();
+}

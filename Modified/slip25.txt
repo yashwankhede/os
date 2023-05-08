@@ -1,0 +1,184 @@
+Q1. 
+
+LOOK
+
+include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+  int RQ[100],i,j,n,thm=0,initial,size,move;
+  printf("Enter number of request\n");
+  scanf("%d",&n);
+  printf("Enter the request sequence\n");
+  for(i=0;i<n;i++)
+  {
+      scanf("%d",&RQ[i]);
+  }
+  printf("Enter initial head position\n");
+  scanf("%d",&initial);
+  printf("Enter total disk size\n");
+  scanf("%d",&size);
+  printf("Enter the head moment direction for high 1 and for low 0\n");
+  scanf("%d",&move);
+  for(i=0;i<n;i++)
+  {
+     for(j=0;j<n-i-1;j++)
+     {
+        if(RQ[j]>RQ[j+1])
+        {
+           int temp;
+           temp=RQ[j];
+           RQ[j]=RQ[j+1];
+           RQ[j+1]=temp;
+        }
+     }
+  }
+  int index;
+  for(i=0;i<n;i++)
+  {
+     if(initial<RQ[i])
+     {
+        index=i;
+        break;
+     }
+  }
+  if(move==1)
+  {
+     for(i=index;i<n;i++)
+     {
+        thm=thm+abs(RQ[i]-initial);
+        initial=RQ[i];
+     }
+     
+     for(i=index-1;i>=0;i--)
+     {
+        thm=thm+abs(RQ[i]-initial);
+        initial=RQ[i];
+     }
+  }
+  else
+  {
+     for(i=index-1;i>=0;i--)
+     {
+        thm=thm+abs(RQ[i]-initial);
+        initial=RQ[i];
+     }
+     
+     for(i=index;i<n;i++)
+     {
+        thm=thm+abs(RQ[i]-initial);
+        initial=RQ[i];
+     }
+  }
+  printf("Total head moment=%d",thm);
+  
+}
+
+-----------------------
+Q2.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_BLOCKS 1000
+
+int blocks[MAX_BLOCKS]; // array to store block status
+
+// function to initialize blocks as free
+void initialize_blocks(int num_blocks) {
+    for (int i = 0; i < num_blocks; i++) {
+        blocks[i] = 0; // 0 means free block
+    }
+}
+
+// function to display bit vector
+void show_bit_vector(int num_blocks) {
+    printf("Bit Vector:\n");
+    for (int i = 0; i < num_blocks; i++) {
+        printf("%d ", blocks[i]);
+    }
+    printf("\n");
+}
+
+// function to create new file
+void create_new_file(int num_blocks) {
+    int start_block, file_size;
+    printf("Enter the starting block number: ");
+    scanf("%d", &start_block);
+    printf("Enter the file size (in blocks): ");
+    scanf("%d", &file_size);
+    
+    // check if the requested blocks are free
+    int flag = 1;
+    for (int i = start_block; i < start_block + file_size; i++) {
+        if (blocks[i] == 1) {
+            flag = 0; // file cannot be created
+            break;
+        }
+    }
+    if (flag == 0) {
+        printf("Error: File cannot be created, requested blocks are not free.\n");
+    }
+    else {
+        // mark blocks as allocated
+        for (int i = start_block; i < start_block + file_size; i++) {
+            blocks[i] = 1; // 1 means allocated block
+        }
+        printf("File created successfully.\n");
+    }
+}
+
+// function to show directory
+void show_directory(int num_blocks) {
+    printf("Directory:\n");
+    int start_block = -1;
+    for (int i = 0; i < num_blocks; i++) {
+        if (blocks[i] == 1 && start_block == -1) {
+            start_block = i; // start of allocated block
+        }
+        else if (blocks[i] == 0 && start_block != -1) {
+            printf("File starting block: %d, size: %d\n", start_block, i - start_block);
+            start_block = -1;
+        }
+    }
+    if (start_block != -1) {
+        printf("File starting block: %d, size: %d\n", start_block, num_blocks - start_block);
+    }
+}
+
+int main() {
+    int num_blocks, choice;
+    printf("Enter the number of blocks in the disk: ");
+    scanf("%d", &num_blocks);
+    initialize_blocks(num_blocks);
+    
+    do {
+        printf("\nMenu:\n");
+        printf("1. Show Bit Vector\n");
+        printf("2. Create New File\n");
+        printf("3. Show Directory\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        
+        switch (choice) {
+            case 1:
+                show_bit_vector(num_blocks);
+                break;
+            case 2:
+                create_new_file(num_blocks);
+                break;
+            case 3:
+                show_directory(num_blocks);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice.\n");
+        }
+    } while (choice != 4);
+    
+    return 0;
+}

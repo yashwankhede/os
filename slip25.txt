@@ -1,0 +1,180 @@
+Q1. 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main() {
+    int n, head, dir, i, j, temp, seek_time = 0;
+    printf("Enter the number of disk blocks: ");
+    scanf("%d", &n);
+    int requests[n];
+    printf("Enter the disk request string: ");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+    printf("Enter the starting head position: ");
+    scanf("%d", &head);
+    printf("Enter the direction (0 for left, 1 for right): ");
+    scanf("%d", &dir);
+    if (dir == 0) {
+        for (i = 0; i < n-1; i++) {
+            for (j = i+1; j < n; j++) {
+                if (requests[i] < requests[j]) {
+                    temp = requests[i];
+                    requests[i] = requests[j];
+                    requests[j] = temp;
+                }
+            }
+        }
+    } else {
+        for (i = 0; i < n-1; i++) {
+            for (j = i+1; j < n; j++) {
+                if (requests[i] > requests[j]) {
+                    temp = requests[i];
+                    requests[i] = requests[j];
+                    requests[j] = temp;
+                }
+            }
+        }
+    }
+    int curr = head;
+    printf("%d ", curr);
+    for (i = 0; i < n; i++) {
+        if ((dir == 0 && requests[i] >= curr) || (dir == 1 && requests[i] <= curr)) {
+            seek_time += abs(requests[i]-curr);
+            curr = requests[i];
+            printf("%d ", curr);
+        }
+    }
+    for (i = n-1; i >= 0; i--) {
+        if ((dir == 0 && requests[i] < curr) || (dir == 1 && requests[i] > curr)) {
+            seek_time += abs(requests[i]-curr);
+            curr = requests[i];
+            printf("%d ", curr);
+        }
+    }
+    printf("\nTotal seek time: %d\n", seek_time);
+    return 0;
+}
+
+/*OUTPUT
+
+Enter the number of disk blocks: 8
+Enter the disk request string: 86 147 91 170 95 130 102 70
+Enter the starting head position: 125
+Enter the direction (0 for left, 1 for right): 0
+125 170 70 
+Total seek time: 145
+
+*/
+
+
+-----------------------
+Q2.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_BLOCKS 1000
+
+int blocks[MAX_BLOCKS]; // array to store block status
+
+// function to initialize blocks as free
+void initialize_blocks(int num_blocks) {
+    for (int i = 0; i < num_blocks; i++) {
+        blocks[i] = 0; // 0 means free block
+    }
+}
+
+// function to display bit vector
+void show_bit_vector(int num_blocks) {
+    printf("Bit Vector:\n");
+    for (int i = 0; i < num_blocks; i++) {
+        printf("%d ", blocks[i]);
+    }
+    printf("\n");
+}
+
+// function to create new file
+void create_new_file(int num_blocks) {
+    int start_block, file_size;
+    printf("Enter the starting block number: ");
+    scanf("%d", &start_block);
+    printf("Enter the file size (in blocks): ");
+    scanf("%d", &file_size);
+    
+    // check if the requested blocks are free
+    int flag = 1;
+    for (int i = start_block; i < start_block + file_size; i++) {
+        if (blocks[i] == 1) {
+            flag = 0; // file cannot be created
+            break;
+        }
+    }
+    if (flag == 0) {
+        printf("Error: File cannot be created, requested blocks are not free.\n");
+    }
+    else {
+        // mark blocks as allocated
+        for (int i = start_block; i < start_block + file_size; i++) {
+            blocks[i] = 1; // 1 means allocated block
+        }
+        printf("File created successfully.\n");
+    }
+}
+
+// function to show directory
+void show_directory(int num_blocks) {
+    printf("Directory:\n");
+    int start_block = -1;
+    for (int i = 0; i < num_blocks; i++) {
+        if (blocks[i] == 1 && start_block == -1) {
+            start_block = i; // start of allocated block
+        }
+        else if (blocks[i] == 0 && start_block != -1) {
+            printf("File starting block: %d, size: %d\n", start_block, i - start_block);
+            start_block = -1;
+        }
+    }
+    if (start_block != -1) {
+        printf("File starting block: %d, size: %d\n", start_block, num_blocks - start_block);
+    }
+}
+
+int main() {
+    int num_blocks, choice;
+    printf("Enter the number of blocks in the disk: ");
+    scanf("%d", &num_blocks);
+    initialize_blocks(num_blocks);
+    
+    do {
+        printf("\nMenu:\n");
+        printf("1. Show Bit Vector\n");
+        printf("2. Create New File\n");
+        printf("3. Show Directory\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        
+        switch (choice) {
+            case 1:
+                show_bit_vector(num_blocks);
+                break;
+            case 2:
+                create_new_file(num_blocks);
+                break;
+            case 3:
+                show_directory(num_blocks);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice.\n");
+        }
+    } while (choice != 4);
+    
+    return 0;
+}

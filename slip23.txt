@@ -1,0 +1,468 @@
+Q1. 
+
+#include<stdio.h>
+int n,i,p[10],m,alloc[10][10],j,max[10][10],avail[10],need[10][10],f[10],ans[10],ind=0,k;
+void accept()
+{
+   printf("\n Enter total number of processes:");
+   scanf("%d",&n);
+   printf("\n Enter total number of resource instances:");
+   scanf("%d",&m);
+   printf("\n Enter Allocation matrix:");
+   for(i=0;i<n;i++)
+   {
+      printf("\n for process p%d:",i);
+      for(j=0;j<m;j++)
+      {
+         scanf("%d",&alloc[i][j]);
+      }
+   }
+   printf("\n Enter Max matrix:");
+   for(i=0;i<n;i++)
+   {
+      printf("\n for process p%d:",i);
+      for(j=0;j<m;j++)
+      {
+         scanf("%d",&max[i][j]);
+      }
+   }
+   printf("\n Enter Available:");
+   for(i=0;i<m;i++)
+   {
+      scanf("%d",&avail[i]);
+   }
+   for(k=0;k<n;k++)
+   {
+      f[k]=0;
+   }
+   int need[n][m];
+   for(i=0;i<n;i++)
+   {
+      for(j=0;j<m;j++)
+      {
+         need[i][j]=max[i][j]-alloc[i][j];
+      }
+   }
+}
+void print()
+{
+   printf("\n Process\n");
+   for(i=0;i<n;i++)
+   {
+      printf("\np%d\t",i);
+   }
+   printf("\nAllocation matrix\n");
+   for(i=0;i<n;i++)
+   {
+      for(j=0;j<m;j++)
+      {
+         printf("%d\t",alloc[i][j]);
+      }
+      printf("\n");
+   }
+   printf("\nMax matrix\n");
+   for(i=0;i<n;i++)
+   {
+      for(j=0;j<m;j++)
+      {
+         printf("%d\t",max[i][j]);
+      }
+      printf("\n");
+   }
+   printf("\nNeed matrix\n");
+   for(i=0;i<n;i++)
+   {
+      for(j=0;j<m;j++)
+      {
+         need[i][j]=max[i][j]-alloc[i][j];
+         printf("%d\t",need[i][j]);
+      }
+      printf("\n");
+   }
+   printf("\n Available\n");
+   for(i=0;i<n;i++)
+   {
+      if(i==0)
+      {
+         for(j=0;j<m;j++)
+         {
+            printf("%d\t",avail[j]);
+         }
+      }
+   }
+}
+void bankers()
+{
+   int y=0;
+   for(k=0;k<n;k++)
+   {
+      for(i=0;i<n;i++)
+      {
+         if(f[i]==0)
+         {
+            int flag=0;
+            for(j=0;j<m;j++)
+            {
+               if(need[i][j]>avail[j])
+               {
+                  flag=1;
+                  break;
+               }
+            }
+            if(flag==0)
+            {
+               ans[ind++]=i;
+               for(y=0;y<m;y++)
+                  avail[y]+=alloc[i][y];
+               f[i]=1;
+            }
+         }
+      }
+   }
+   int flag=1;
+   for(i=0;i<n;i++)
+   {
+      if(f[i]==0)
+      {
+         flag=0;
+         printf("\n The following system is not safe");
+         break;
+      }
+   }
+   if(flag==1)
+   {
+      printf("\n Request granted immediately\n\n Safe sequence are:");
+      for(i=0;i<n-1;i++)
+         printf("p%d->",ans[i]);
+      printf("p%d",ans[n-1]);
+   }
+   printf("\n");
+}
+
+int main()
+{
+   accept();
+   print();
+   bankers();
+   int pno,req[10];
+   printf("Enter requesting process no:\n");
+   scanf("%d",&pno);
+   printf("Enter resource request of process p%d:\n",pno-1);
+   for(j=0;j<m;j++)
+   {
+      scanf("%d",&req[j]);
+   }
+   for(j=0;j<m;j++)
+   {
+      if(req[j]>need[pno][j])
+         break;
+   }
+   if(j==m)
+   {
+      for(j=0;j<m;j++)
+      {
+         if(req[j]>avail[j])
+            break;
+      }
+      if(j==m)
+      {
+         for(j=0;j<m;j++)
+         {
+            avail[j]-=req[j];
+            alloc[pno][j]+=req[j];
+            need[pno][j]-=req[j];
+            print();
+            bankers();
+         }
+      }
+   }
+   else
+   {
+      printf(" Request of process p%d cannot granted immediately\n",pno-1);
+   }
+}  
+/*
+output
+ty23@pc20:~/OS2/Assignment1$ cc q4.c
+ty23@pc20:~/OS2/Assignment1$ ./a.out
+
+ Enter total number of processes:5
+
+ Enter total number of resource instances:4
+
+ Enter Allocation matrix:
+ for process p0:0 0 1 2
+
+ for process p1:1 0 0 0
+
+ for process p2:1 3 5 4
+
+ for process p3:0 6 3 2
+
+ for process p4:0 0 1 4
+
+ Enter Max matrix:
+ for process p0:0 0 1 2
+
+ for process p1:1 7 5 0
+
+ for process p2:2 3 5 6
+
+ for process p3:0 6 5 2
+
+ for process p4:0 6 5 6
+
+ Enter Available:1 5 2 0
+
+ Process
+
+p0	
+p1	
+p2	
+p3	
+p4	
+Allocation matrix
+0	0	1	2	
+1	0	0	0	
+1	3	5	4	
+0	6	3	2	
+0	0	1	4	
+
+Max matrix
+0	0	1	2	
+1	7	5	0	
+2	3	5	6	
+0	6	5	2	
+0	6	5	6	
+
+Need matrix
+0	0	0	0	
+0	7	5	0	
+1	0	0	2	
+0	0	2	0	
+0	6	4	2	
+
+ Available
+1	5	2	0	
+ Following system is safe
+
+ Safe sequence are:p0->p2->p3->p4->p1
+Enter requesting process no:
+1
+Enter resource request of process p1:
+0 4 2 0
+
+ Process
+
+p0	
+p1	
+p2	
+p3	
+p4	
+Allocation matrix
+0	0	1	2	
+1       4       2       0	
+1	3	5	4	
+0	6	3	2	
+0	0	1	4	
+
+Max matrix
+0	0	1	2	
+1	7	5	0	
+2	3	5	6	
+0	6	5	2	
+0	6	5	6	
+
+Need matrix
+0	0	0	0	
+0	3       3       0	
+1	0	0	2	
+0	0	2	0	
+0	6	4	2	
+
+ Available
+3	14	12	12	
+ Following system is safe
+
+ Safe sequence are:p0->p2->p3->p4->p1
+ty23@pc20:~/OS2/Assignment1$ 
+
+
+OUTPUT
+ty23@pc20:~/OS2/Assignment1$ cc q4.c
+ty23@pc20:~/OS2/Assignment1$ ./a.out
+
+ Enter total number of processes:6
+
+ Enter total number of resource instances:4
+
+ Enter Allocation matrix:
+ for process p0:0 3 2 4
+
+ for process p1:1 2 0 1
+
+ for process p2:0 0 0 0
+
+ for process p3:3 3 2 2
+
+ for process p4:1 4 3 2
+
+ for process p5:2 4 1 4
+
+ Enter Max matrix:
+ for process p0:6 5 4 4
+
+ for process p1:4 4 4 4
+
+ for process p2:0 0 1 2
+
+ for process p3:3 9 3 4
+
+ for process p4:2 5 3 3
+
+ for process p5:4 6 3 4
+
+ Enter Available:3 4 5 2
+
+ Process
+
+p0	
+p1	
+p2	
+p3	
+p4	
+p5	
+Allocation matrix
+0	3	2	4	
+1	2	0	1	
+0	0	0	0	
+3	3	2	2	
+1	4	3	2	
+2	4	1	4	
+
+Max matrix
+6	5	4	4	
+4	4	4	4	
+0	0	1	2	
+3	9	3	4	
+2	5	3	3	
+4	6	3	4	
+
+Need matrix
+6	2	2	0	
+3	2	4	3	
+0	0	1	2	
+0	6	1	2	
+1	1	0	1	
+2	2	2	0	
+
+ Available
+3	4	5	2	
+ Request granted immediately
+
+ Safe sequence are:p2->p4->p5->p0->p1->p3
+Enter requesting process no:
+1
+Enter resource request of process p1:
+2 2 3 3
+ Request of process p1 cannot granted immediately
+ty23@pc20:~/OS2/Assignment1$ 
+
+
+*/
+
+
+----------------
+Q2.
+
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+   int queue[20],n,head,i,j,k,seek=0,max,diff,temp,queue1[20],queue2[20],temp1=0,temp2=0;
+   
+   printf("Enter the max range of disk\n");
+   scanf("%d",&max);
+   printf("Enter the initial head position\n");
+   scanf("%d",&head);
+   printf("Enter size of queue request\n");
+   scanf("%d",&n);
+   printf("Enter queue of disk positions to be read\n");
+   for(i=1;i<=n;i++)
+   {
+      scanf("%d",&temp);
+      if(temp>=head)
+      {
+         queue1[temp1]=temp;
+         temp1++;
+      }
+      else
+      {
+         queue2[temp2]=temp;
+         temp2++;
+      }
+   }
+   for(i=0;i<temp1-1;i++)
+   {
+      for(j=i+1;j<temp1;j++)
+      {
+         if(queue1[i]>queue1[j])
+         {
+            temp=queue1[i];
+            queue1[i]=queue1[j];
+            queue1[j]=temp;
+         }
+      }
+   }
+   for(i=0;i<temp2;i++)
+   {
+      for(j=i+1;j<temp2;j++)
+      {
+         if(queue2[i]>queue2[j])
+         {
+            temp=queue2[i];
+            queue2[i]=queue2[j];
+            queue2[j]=temp;
+         }
+      }
+   }
+   for(i=1,j=0;j<temp1;i++,j++)
+      queue[i]=queue1[j];
+   queue[i]=max;
+   queue[i+1]=0;
+   for(i=temp1+3,j=0;j<temp2;i++,j++)
+      queue[i]=queue2[j];
+   //queue[i]=0;
+   queue[0]=head;
+   for(j=0;j<=n+1;j++)
+   {
+      diff=abs(queue[j+1]-queue[j]);
+      seek+=diff;
+      printf("Disk head moves from %d to %d \n",queue[j],queue[j+1]);
+   }
+   printf("Total seek time is %d\n",seek-max);
+}
+/*
+ty23@pc20:~/OS2/Assignment3$ gcc q3.c
+ty23@pc20:~/OS2/Assignment3$ ./a.out
+Enter the max range of disk
+199
+Enter the initial head position
+53
+Enter size of queue request
+7
+Enter queue of disk positions to be read
+82 170 43 140 24 16 190
+Disk head moves from 53 to 82 
+Disk head moves from 82 to 140 
+Disk head moves from 140 to 170 
+Disk head moves from 170 to 190 
+Disk head moves from 190 to 199 
+Disk head moves from 199 to 0 
+Disk head moves from 0 to 16 
+Disk head moves from 16 to 24 
+Disk head moves from 24 to 43 
+Total seek time is 189
+ty23@pc20:~/OS2/Assignment3$ 
+
+*/

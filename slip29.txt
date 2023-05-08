@@ -1,0 +1,139 @@
+Q1. 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+#define ARRAY_SIZE 1000
+
+int main(int argc, char** argv) {
+    int rank, size;
+    int array[ARRAY_SIZE];
+    int i, sum = 0, even_sum = 0;
+    MPI_Status status;
+
+    // Initialize MPI environment
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Seed the random number generator
+    srand(rank);
+
+    // Initialize the array with random numbers
+    for (i = 0; i < ARRAY_SIZE; i++) {
+        array[i] = rand();
+    }
+
+    // Calculate the sum of all even numbers
+    for (i = rank; i < ARRAY_SIZE; i += size) {
+        sum += array[i];
+        if (array[i] % 2 == 0) {
+            even_sum += array[i];
+        }
+    }
+
+    // Reduce the even_sum across all processes
+    MPI_Reduce(&even_sum, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // Print the result
+    if (rank == 0) {
+        printf("Sum of all even numbers: %d\n", sum);
+    }
+
+    // Finalize MPI environment
+    MPI_Finalize();
+    return 0;
+}
+
+--------------------
+Q2.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_REQUESTS 100
+
+int cmpfunc(const void* a, const void* b) {
+   return (*(int*)a - *(int*)b);
+}
+
+int main() {
+    int total_blocks, requests[MAX_REQUESTS], n_requests;
+    int current_head, direction, i, j, next_request, head_movements;
+
+    // Accept input from the user
+    printf("Enter the total number of disk blocks: ");
+    scanf("%d", &total_blocks);
+
+    printf("Enter the number of requests: ");
+    scanf("%d", &n_requests);
+
+    printf("Enter the requests: ");
+    for (i = 0; i < n_requests; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter the starting head position: ");
+    scanf("%d", &current_head);
+
+    printf("Enter the direction (0 for left, 1 for right): ");
+    scanf("%d", &direction);
+
+    // Sort the request array
+    qsort(requests, n_requests, sizeof(int), cmpfunc);
+
+    // Find the first request greater than the current head position
+    for (i = 0; i < n_requests; i++) {
+        if (requests[i] > current_head) {
+            next_request = i;
+            break;
+        }
+    }
+
+    // Perform C-LOOK algorithm
+    head_movements = 0;
+    printf("%d ", current_head);
+    if (direction == 1) { // Right
+        for (i = next_request; i < n_requests; i++) {
+            printf("%d ", requests[i]);
+            head_movements += abs(requests[i] - current_head);
+            current_head = requests[i];
+        }
+        for (i = 0; i < next_request; i++) {
+            printf("%d ", requests[i]);
+            head_movements += abs(requests[i] - current_head);
+            current_head = requests[i];
+        }
+    }
+    else { // Left
+        for (i = next_request - 1; i >= 0; i--) {
+            printf("%d ", requests[i]);
+            head_movements += abs(requests[i] - current_head);
+            current_head = requests[i];
+        }
+        for (i = n_requests - 1; i >= next_request; i--) {
+            printf("%d ", requests[i]);
+            head_movements += abs(requests[i] - current_head);
+            current_head = requests[i];
+        }
+    }
+
+    // Print the total number of head movements
+    printf("\nTotal number of head movements: %d\n", head_movements);
+
+    return 0;
+}
+
+/*OUTPUT
+
+Enter the total number of disk blocks: 200
+Enter the number of requests: 7
+Enter the requests: 80 150 60 135 40 35 170
+Enter the starting head position: 70
+Enter the direction (0 for left, 1 for right): 1
+70 80 135 150 170 40 35  // Order in which requests are served
+Total number of head movements: 325
+
+
+*/
